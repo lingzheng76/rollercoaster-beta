@@ -703,6 +703,102 @@ define( function( require ) {
       }
     },
 
+    //////below Zhilin changes
+    //////This two new methods ensure the track not going out of the left limit of window
+    getLowestX: function() {
+      if ( !this.ySearchPoints ) {
+        this.xSearchPoints = SplineEvaluation.atArray( this.xSpline, this.searchLinSpace );
+        this.ySearchPoints = SplineEvaluation.atArray( this.ySpline, this.searchLinSpace );
+      }
+
+      var min = Number.POSITIVE_INFINITY;
+      var minIndex = -1;
+      var x;
+      for ( var i = 0; i < this.xSearchPoints.length; i++ ) {
+        x = this.xSearchPoints[i];
+        if ( x < min ) {
+          min = x;
+          minIndex = i;
+        }
+      }
+
+      // Increase resolution in the neighborhood of y
+      var foundU = this.searchLinSpace[minIndex];
+
+      var minBound = foundU - this.distanceBetweenSamplePoints;
+      var maxBound = foundU + this.distanceBetweenSamplePoints;
+
+      var smallerSpace = numeric.linspace( minBound, maxBound, 200 );
+      var refinedSearchPoints = SplineEvaluation.atArray( this.xSpline, smallerSpace );
+
+      min = Number.POSITIVE_INFINITY;
+      for ( i = 0; i < refinedSearchPoints.length; i++ ) {
+        x = refinedSearchPoints[i];
+        if ( x < min ) {
+          min = x;
+        }
+      }
+
+      return min;
+    },
+
+    bumpAsideLeftWindow: function() {
+      var lowestX = this.getLowestX();
+      if ( lowestX < -9.5 ) {
+        this.translate(-9.5-lowestX, 0 );
+      }
+    },
+
+    getHighestX: function() {
+      if ( !this.ySearchPoints ) {
+        this.xSearchPoints = SplineEvaluation.atArray( this.xSpline, this.searchLinSpace );
+        this.ySearchPoints = SplineEvaluation.atArray( this.ySpline, this.searchLinSpace );
+      }
+
+      var max = Number.NEGATIVE_INFINITY;
+      var maxIndex = -1;
+      var x;
+      for ( var i = 0; i < this.xSearchPoints.length; i++ ) {
+        x = this.xSearchPoints[i];
+        if ( x > max ) {
+          max = x;
+          maxIndex = i;
+        }
+      }
+
+      // Increase resolution in the neighborhood of y
+      var foundU = this.searchLinSpace[maxIndex];
+
+      var minBound = foundU - this.distanceBetweenSamplePoints;
+      var maxBound = foundU + this.distanceBetweenSamplePoints;
+
+      var smallerSpace = numeric.linspace( minBound, maxBound, 200 );
+      var refinedSearchPoints = SplineEvaluation.atArray( this.xSpline, smallerSpace );
+
+      max = Number.NEGATIVE_INFINITY;
+      for ( i = 0; i < refinedSearchPoints.length; i++ ) {
+        x = refinedSearchPoints[i];
+        if ( x > max ) {
+          max = x;
+        }
+      }
+
+      return max;
+    },
+
+    //ensure the track won't get beyond the right limit
+    bumpAsideRightWindow: function() {
+      var highestX = this.getHighestX();
+      if ( highestX > 10 ) {
+        this.translate( -2, 0 );
+      }
+    },
+
+    /////////above Zhilin change
+
+
+
+
     /**
      * Smooth out the track so it doesn't have any sharp turns, see #177
      * @param {Number} i the index of the control point to adjust

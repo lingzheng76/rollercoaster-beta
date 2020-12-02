@@ -173,6 +173,10 @@ define( function( require ) {
             model.trackModified( track );
           }
           track.bumpAboveGround();
+
+          //Zhilin added
+          track.bumpAsideLeftWindow();
+          track.bumpAsideRightWindow();
           track.dragging = false;
 
           // Show the 'control point editing' ui, but only if the user didn't drag the control point.
